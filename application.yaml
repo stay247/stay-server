@@ -1,0 +1,10 @@
+naver:
+  url:
+    base: https://nid.naver.com/oauth2.0/
+    redirect: http://localhost:8080/login/naver/callback
+    userdata: https://openapi.naver.com/v1/nid/me
+
+  client:
+    id: shLrTHnjRILnVJD5mN2V
+    secret: xS5mKrEnrv
+

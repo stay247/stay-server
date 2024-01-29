@@ -2,8 +2,9 @@ package com.stayserver.stayserver.service;
 
 
 import com.google.gson.Gson;
-import com.stayserver.stayserver.ApplicationEnvironmentConfig;
+import com.stayserver.stayserver.config.ApplicationEnvironmentConfig;
 import com.stayserver.stayserver.dto.NaverTokenDTO;
+import com.stayserver.stayserver.dto.naverUser.NaverUserDTO;
 import com.stayserver.stayserver.util.RestUtil;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -18,14 +19,14 @@ import java.security.SecureRandom;
 
 @Service
 @RequiredArgsConstructor
-public class LoginService {
+public class OauthService {
 
     private final ApplicationEnvironmentConfig envConfig;
     private final RestUtil restUtil;
 
     public String createNaverOauthURL(HttpSession httpSession) {
 
-        String baseURL = envConfig.getConfigValue("naver.url.base")+"authorize";
+        String baseURL = envConfig.getConfigValue("naver.url.base") + "authorize";
         String clientID = envConfig.getConfigValue("naver.client.id");
         String redirectURL = envConfig.getConfigValue("naver.url.redirect");
 
@@ -70,10 +71,30 @@ public class LoginService {
     }
 
 
+    public void getUserByNaverToken(NaverTokenDTO naverTokenDTO) {
+
+        String accessToken = naverTokenDTO.getAccess_token();
+        String tokenType = naverTokenDTO.getToken_type();
+
+        String url = envConfig.getConfigValue("naver.url.userdata");
+
+        String response = restUtil.get(url, accessToken, tokenType);
+
+        Gson gson = new Gson();
+        NaverUserDTO user = gson.fromJson(response, NaverUserDTO.class);
+
+        if (user.getMessage().equals("success")) {
+            System.out.println(user.getResponse()); // 데이터베이스 저장 or 조회 추가해야함
+        }
+
+    }
+
+
     // CSRF 방지를 위한 상태 토큰 생성 코드
     // 상태 토큰은 추후 검증을 위해 세션에 저장되어야 한다.
     public String generateState() {
         SecureRandom random = new SecureRandom();
+
         return new BigInteger(130, random).toString(32);
     }
 

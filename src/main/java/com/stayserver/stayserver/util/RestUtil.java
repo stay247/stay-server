@@ -17,29 +17,36 @@ public class RestUtil {
     private final RestTemplate restTemplate;
 
     public String get(String url) {
-        // Set headers
         HttpHeaders headers = new HttpHeaders();
-
-        // Set Entity (GET 요청의 경우 본문이 없으므로 null로 설정)
         HttpEntity<String> requestEntity = new HttpEntity<>(null, headers);
-
-        // Request
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class);
 
         return response.getBody();
     }
 
     public String post(String url, MultiValueMap<String, String> body) {
-        // Set headers
         HttpHeaders headers = new HttpHeaders();
-
-        // Set Entity
         HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(body, headers);
-
-        // Request
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
 
+        return response.getBody();
+    }
 
+    // 토큰
+    public String get(String url, String accessToken, String tokenType) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", tokenType + " " + accessToken);
+        HttpEntity<String> requestEntity = new HttpEntity<>(null, headers);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class);
+        return response.getBody();
+    }
+
+    // 토큰
+    public String post(String url, MultiValueMap<String, String> body, String accessToken, String tokenType) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", tokenType + " " + accessToken);
+        HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(body, headers);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
         return response.getBody();
     }
 }
