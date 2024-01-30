@@ -8,3 +8,9 @@ naver:
     id: shLrTHnjRILnVJD5mN2V
     secret: xS5mKrEnrv
 
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/stay
+    username: root
+    password: db
+    driver-class-name: com.mysql.cj.jdbc.Driver

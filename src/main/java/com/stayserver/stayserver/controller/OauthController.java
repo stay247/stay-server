@@ -1,6 +1,6 @@
 package com.stayserver.stayserver.controller;
 
-import com.stayserver.stayserver.dto.NaverTokenDTO;
+import com.stayserver.stayserver.dto.NaverTokenDto;
 import com.stayserver.stayserver.service.OauthService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +27,7 @@ public class OauthController {
     public RedirectView naverCallback(HttpSession httpSession, @RequestParam("code") String code, @RequestParam("state") String state) {
 
         if (oauthService.verifyState(httpSession, state)) {
-            NaverTokenDTO naverToken = oauthService.getNaverToken(code);
+            NaverTokenDto naverToken = oauthService.getNaverToken(code);
             oauthService.getUserByNaverToken(naverToken);
 
             return new RedirectView(/* 로그인 이후 페이지 */"success");

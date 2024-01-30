@@ -7,7 +7,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class NaverUser {
+public class NaverUserDto {
     private String id;
     private String nickname;
     private String profile_image;

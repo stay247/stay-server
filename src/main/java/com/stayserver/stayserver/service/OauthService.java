@@ -3,8 +3,13 @@ package com.stayserver.stayserver.service;
 
 import com.google.gson.Gson;
 import com.stayserver.stayserver.config.ApplicationEnvironmentConfig;
-import com.stayserver.stayserver.dto.NaverTokenDTO;
-import com.stayserver.stayserver.dto.naverUser.NaverUserDTO;
+import com.stayserver.stayserver.dto.NaverTokenDto;
+import com.stayserver.stayserver.dto.naverUser.NaverMsgDto;
+import com.stayserver.stayserver.dto.naverUser.NaverUserDto;
+import com.stayserver.stayserver.entity.NaverUser;
+import com.stayserver.stayserver.mapper.NaverUserMapper;
+import com.stayserver.stayserver.repository.NaverUserRepository;
+import com.stayserver.stayserver.repository.UserRepository;
 import com.stayserver.stayserver.util.RestUtil;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +21,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +29,8 @@ public class OauthService {
 
     private final ApplicationEnvironmentConfig envConfig;
     private final RestUtil restUtil;
+    private final NaverUserRepository naverUserRepository;
+    private final UserRepository userRepository;
 
     public String createNaverOauthURL(HttpSession httpSession) {
 
@@ -43,7 +51,7 @@ public class OauthService {
                 .toUriString();
     }
 
-    public NaverTokenDTO getNaverToken(String code) {
+    public NaverTokenDto getNaverToken(String code) {
         String tokenUrl = envConfig.getConfigValue("naver.url.base") + "token";
         String clientID = envConfig.getConfigValue("naver.client.id");
         String clientSecret = envConfig.getConfigValue("naver.client.secret");
@@ -60,7 +68,7 @@ public class OauthService {
         String response = restUtil.post(tokenUrl, body);
         Gson gson = new Gson();
 
-        NaverTokenDTO naverToken = gson.fromJson(response, NaverTokenDTO.class);
+        NaverTokenDto naverToken = gson.fromJson(response, NaverTokenDto.class);
 
         System.out.println(naverToken.getAccess_token());
         System.out.println(naverToken.getRefresh_token());
@@ -71,7 +79,7 @@ public class OauthService {
     }
 
 
-    public void getUserByNaverToken(NaverTokenDTO naverTokenDTO) {
+    public void getUserByNaverToken(NaverTokenDto naverTokenDTO) {
 
         String accessToken = naverTokenDTO.getAccess_token();
         String tokenType = naverTokenDTO.getToken_type();
@@ -81,12 +89,30 @@ public class OauthService {
         String response = restUtil.get(url, accessToken, tokenType);
 
         Gson gson = new Gson();
-        NaverUserDTO user = gson.fromJson(response, NaverUserDTO.class);
+        NaverMsgDto user = gson.fromJson(response, NaverMsgDto.class);
 
         if (user.getMessage().equals("success")) {
-            System.out.println(user.getResponse()); // 데이터베이스 저장 or 조회 추가해야함
+            isUserRegistered(user.getResponse());
         }
 
+    }
+
+    public void isUserRegistered(NaverUserDto user) {
+        String id = user.getId();
+        Optional<NaverUser> naverUser = naverUserRepository.findById(id);
+
+        if (naverUser.isPresent()) {
+            // 해당 유저의 페이지로 이동
+        } else {
+            registerUser(user);
+        }
+    }
+
+    private void registerUser(NaverUserDto user) {
+        NaverUser naverUser = NaverUserMapper.INSTANCE.toEntity(user);
+
+        naverUserRepository.save(naverUser);
+        // 해당 유저의 페이지로 이동
     }
 
 

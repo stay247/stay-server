@@ -1,11 +1,12 @@
 package com.stayserver.stayserver.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.util.Date;
 
 @Entity
-@Table(name = "user")
+@Data
 public class User {
     @Id
     private Integer userId;

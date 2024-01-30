@@ -7,8 +7,8 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class NaverUserDTO {
+public class NaverMsgDto {
     private String resultcode;
     private String message;
-    private NaverUser response;
+    private NaverUserDto response;
 }

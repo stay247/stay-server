@@ -1,12 +1,12 @@
 package com.stayserver.stayserver.entity;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.Data;
 
 
 @Entity
-@Table(name = "naver_user")
+@Data
 public class NaverUser {
     @Id
     private String id;
@@ -16,7 +16,7 @@ public class NaverUser {
     private char gender;
     private String email;
     private String mobile;
-    private String mobileE164;
+    private String mobile_e164;
     private String name;
     private String birthday;
     private Integer birthyear;
