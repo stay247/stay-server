@@ -1,4 +1,4 @@
-package com.stayserver.stayserver.dto;
+package com.stayserver.stayserver.dto.naver.naverUser;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,6 +1,6 @@
 package com.stayserver.stayserver.controller;
 
-import com.stayserver.stayserver.dto.NaverTokenDto;
+import com.stayserver.stayserver.dto.naver.naverUser.NaverTokenDto;
 import com.stayserver.stayserver.service.OauthService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;

@@ -9,6 +9,7 @@ import java.util.Date;
 @Data
 public class User {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer userId;
     private String naverUserId;
     private Date registrationDate;

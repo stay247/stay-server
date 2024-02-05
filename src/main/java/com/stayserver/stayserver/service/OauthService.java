@@ -3,13 +3,12 @@ package com.stayserver.stayserver.service;
 
 import com.google.gson.Gson;
 import com.stayserver.stayserver.config.ApplicationEnvironmentConfig;
-import com.stayserver.stayserver.dto.NaverTokenDto;
-import com.stayserver.stayserver.dto.naverUser.NaverMsgDto;
-import com.stayserver.stayserver.dto.naverUser.NaverUserDto;
+import com.stayserver.stayserver.dto.naver.naverUser.NaverMsgDto;
+import com.stayserver.stayserver.dto.naver.naverUser.NaverTokenDto;
+import com.stayserver.stayserver.dto.naver.naverUser.NaverUserDto;
 import com.stayserver.stayserver.entity.NaverUser;
 import com.stayserver.stayserver.mapper.NaverUserMapper;
 import com.stayserver.stayserver.repository.NaverUserRepository;
-import com.stayserver.stayserver.repository.UserRepository;
 import com.stayserver.stayserver.util.RestUtil;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +29,7 @@ public class OauthService {
     private final ApplicationEnvironmentConfig envConfig;
     private final RestUtil restUtil;
     private final NaverUserRepository naverUserRepository;
-    private final UserRepository userRepository;
+    private final RegisterService registerService;
 
     public String createNaverOauthURL(HttpSession httpSession) {
 
@@ -97,28 +96,20 @@ public class OauthService {
 
     }
 
-    public void isUserRegistered(NaverUserDto user) {
-        String id = user.getId();
-        Optional<NaverUser> naverUser = naverUserRepository.findById(id);
+    private void isUserRegistered(NaverUserDto naverUser) {
+        String naverUserId = naverUser.getId();
+        Optional<NaverUser> checker = naverUserRepository.findById(naverUserId);
 
-        if (naverUser.isPresent()) {
-            // 해당 유저의 페이지로 이동
+        if (checker.isPresent()) {
+            // 해당 유저의 페이지로 이동하는 로직 추가해야함
         } else {
-            registerUser(user);
+            registerService.registerUser(NaverUserMapper.INSTANCE.toEntity(naverUser));
         }
     }
 
-    private void registerUser(NaverUserDto user) {
-        NaverUser naverUser = NaverUserMapper.INSTANCE.toEntity(user);
-
-        naverUserRepository.save(naverUser);
-        // 해당 유저의 페이지로 이동
-    }
-
-
     // CSRF 방지를 위한 상태 토큰 생성 코드
     // 상태 토큰은 추후 검증을 위해 세션에 저장되어야 한다.
-    public String generateState() {
+    private String generateState() {
         SecureRandom random = new SecureRandom();
 
         return new BigInteger(130, random).toString(32);
