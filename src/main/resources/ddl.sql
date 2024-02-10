@@ -27,53 +27,38 @@ CREATE TABLE `user`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_general_ci;
 
-CREATE TABLE `object`
+CREATE TABLE item
 (
-    `object_id` INT AUTO_INCREMENT PRIMARY KEY COMMENT '객체 식별자',
-    `user_id` INT NOT NULL COMMENT '소유한 사용자 ID',
-    `name` VARCHAR(255) NOT NULL COMMENT '객체 이름',
-    `description` TEXT COMMENT '객체 설명',
-    FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
+    `item_id` INT AUTO_INCREMENT PRIMARY KEY COMMENT '아이템 식별자',
+    `name` VARCHAR(255) NOT NULL COMMENT '아이템 이름',
+    `description` TEXT COMMENT '아이템 설명'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `shape`
 (
     `shape_id` INT AUTO_INCREMENT PRIMARY KEY COMMENT '모양 식별자',
-    `object_id` INT NOT NULL COMMENT '객체 ID',
+    `item_id` INT NOT NULL COMMENT '아이템 ID',
     `shape_data` TEXT NOT NULL COMMENT '모양 데이터',
-    FOREIGN KEY (`object_id`) REFERENCES `object` (`object_id`)
+    FOREIGN KEY (`item_id`) REFERENCES item (`item_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `sound`
 (
     `sound_id` INT AUTO_INCREMENT PRIMARY KEY COMMENT '소리 식별자',
-    `object_id` INT NOT NULL COMMENT '객체 ID',
+    `item_id` INT NOT NULL COMMENT '아이템 ID',
     `sound_data` TEXT NOT NULL COMMENT '소리 데이터',
-    FOREIGN KEY (`object_id`) REFERENCES `object` (`object_id`)
+    FOREIGN KEY (`item_id`) REFERENCES item (`item_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE `text`
+CREATE TABLE `item_usage`
 (
-    `text_id` INT AUTO_INCREMENT PRIMARY KEY COMMENT '텍스트 식별자',
-    `object_id` INT NOT NULL COMMENT '객체 ID',
-    `text_content` TEXT NOT NULL COMMENT '텍스트 내용',
-    FOREIGN KEY (`object_id`) REFERENCES `object` (`object_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-CREATE TABLE `place`
-(
-    `place_id` INT AUTO_INCREMENT PRIMARY KEY COMMENT '장소 식별자',
+    `item_usage_id` INT AUTO_INCREMENT PRIMARY KEY COMMENT '아이템 사용 식별자',
+    `item_id` INT NOT NULL COMMENT '아이템 ID',
     `user_id` INT NOT NULL COMMENT '소유한 사용자 ID',
-    `name` VARCHAR(255) NOT NULL COMMENT '장소 이름',
-    `description` TEXT COMMENT '장소 설명',
+    `x_coordinate` DECIMAL NOT NULL COMMENT 'X 좌표',
+    `y_coordinate` DECIMAL NOT NULL COMMENT 'Y 좌표',
+    `z_coordinate` DECIMAL NOT NULL COMMENT 'Z 좌표',
+    FOREIGN KEY (`item_id`) REFERENCES `item` (`item_id`),
     FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE `object_place`
-(
-    `object_id` INT NOT NULL,
-    `place_id` INT NOT NULL,
-    PRIMARY KEY (`object_id`, `place_id`),
-    FOREIGN KEY (`object_id`) REFERENCES `object` (`object_id`),
-    FOREIGN KEY (`place_id`) REFERENCES `place` (`place_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

@@ -22,6 +22,7 @@ repositories {
 }
 
 dependencies {
+	implementation 'com.amazonaws:aws-java-sdk-s3:1.12.655'
 	// Map Struct
 	implementation 'org.mapstruct:mapstruct:1.5.3.Final'
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.3.Final'

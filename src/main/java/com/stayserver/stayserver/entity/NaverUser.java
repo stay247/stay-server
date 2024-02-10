@@ -13,7 +13,7 @@ public class NaverUser {
     private String nickname;
     private String profileImage;
     private String age;
-    private char gender;
+    private String gender;
     private String email;
     private String mobile;
     private String mobile_e164;
