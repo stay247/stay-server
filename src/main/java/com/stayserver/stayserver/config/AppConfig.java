@@ -2,10 +2,10 @@ package com.stayserver.stayserver.config;
 
 
 import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
-@Service
+@Configuration
 public class AppConfig {
 
     @Bean

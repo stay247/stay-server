@@ -11,7 +11,7 @@ public class NaverUser {
     @Id
     private String id;
     private String nickname;
-    private String profileImage;
+    private String profile_image;
     private String age;
     private String gender;
     private String email;

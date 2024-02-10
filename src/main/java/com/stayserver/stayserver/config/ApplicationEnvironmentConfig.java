@@ -1,10 +1,10 @@
 package com.stayserver.stayserver.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
 
-@Component
+@Configuration
 @RequiredArgsConstructor
 public class ApplicationEnvironmentConfig {
 
