@@ -31,7 +31,8 @@ CREATE TABLE item
 (
     `item_id` INT AUTO_INCREMENT PRIMARY KEY COMMENT '아이템 식별자',
     `name` VARCHAR(255) NOT NULL COMMENT '아이템 이름',
-    `description` TEXT COMMENT '아이템 설명'
+    `description` TEXT COMMENT '아이템 설명',
+    `authorization` VARCHAR(255) NOT NULL COMMENT '아이템 인가'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `shape`

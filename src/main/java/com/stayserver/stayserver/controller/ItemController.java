@@ -1,46 +1,49 @@
 package com.stayserver.stayserver.controller;
 
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.stayserver.stayserver.config.ApplicationEnvironmentConfig;
+import com.stayserver.stayserver.service.ItemService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URLConnection;
 
 @RestController
-@RequestMapping("/upload")
+@RequestMapping("/item")
 @RequiredArgsConstructor
+@Slf4j
 public class ItemController {
 
-    private final AmazonS3Client amazonS3Client;
-    private final ApplicationEnvironmentConfig envConfig;
+    private final ItemService itemService;
 
-    @Value("${cloud.aws.s3.bucket}")
-    private String bucket;
-
-    @PostMapping
-    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
+    @GetMapping("/download/{fileName}")
+    public ResponseEntity<byte[]> downloadItem(@PathVariable String fileName) {
         try {
-            String fileName=file.getOriginalFilename();
-            String fileUrl= "https://" + bucket + "/test" +fileName;
-            ObjectMetadata metadata= new ObjectMetadata();
-            metadata.setContentType(file.getContentType());
-            metadata.setContentLength(file.getSize());
-            amazonS3Client.putObject(bucket,fileName,file.getInputStream(),metadata);
+            byte[] bytes = itemService.downloadItem(fileName);
+            String mimeType = URLConnection.guessContentTypeFromName(fileName);
+            mimeType = mimeType == null ? "application/octet-stream" : mimeType;
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.parseMediaType(mimeType));
+            headers.setContentDisposition(ContentDisposition.attachment().filename(fileName).build());
+
+            return new ResponseEntity<>(bytes, headers, HttpStatus.OK);
+        } catch (IOException e) {
+            log.error("Error downloading file: {}", fileName, e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/upload")
+    public ResponseEntity<String> uploadItem(@RequestParam("file") MultipartFile file) {
+        try {
+            String fileUrl = itemService.uploadItem(file);
             return ResponseEntity.ok(fileUrl);
         } catch (IOException e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            log.error("Error uploading file: {}", file.getOriginalFilename(), e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }
-
-//https://stay-audio.s3.ap-northeast-2.amazonaws.com/sample.mp3

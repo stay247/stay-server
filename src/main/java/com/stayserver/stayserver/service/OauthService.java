@@ -7,8 +7,10 @@ import com.stayserver.stayserver.dto.naver.naverUser.NaverMsgDto;
 import com.stayserver.stayserver.dto.naver.naverUser.NaverTokenDto;
 import com.stayserver.stayserver.dto.naver.naverUser.NaverUserDto;
 import com.stayserver.stayserver.entity.NaverUser;
+import com.stayserver.stayserver.entity.User;
 import com.stayserver.stayserver.mapper.NaverUserMapper;
 import com.stayserver.stayserver.repository.NaverUserRepository;
+import com.stayserver.stayserver.repository.UserRepository;
 import com.stayserver.stayserver.util.RestUtil;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
+import java.util.Date;
 import java.util.Optional;
 
 @Service
@@ -29,7 +32,7 @@ public class OauthService {
     private final ApplicationEnvironmentConfig envConfig;
     private final RestUtil restUtil;
     private final NaverUserRepository naverUserRepository;
-    private final RegisterService registerService;
+    private final UserRepository userRepository;
 
     public String createNaverOauthURL(HttpSession httpSession) {
 
@@ -55,13 +58,10 @@ public class OauthService {
         String clientID = envConfig.getConfigValue("naver.client.id");
         String clientSecret = envConfig.getConfigValue("naver.client.secret");
 
-//        String state = generateState();
-
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("client_id", clientID);
         body.add("client_secret", clientSecret);
         body.add("grant_type", "authorization_code");
-//        body.add("state", state); 사용 이유가 없음
         body.add("code", code);
 
         String response = restUtil.post(tokenUrl, body);
@@ -103,8 +103,22 @@ public class OauthService {
         if (checker.isPresent()) {
             // 해당 유저의 페이지로 이동하는 로직 추가해야함
         } else {
-            registerService.registerUser(NaverUserMapper.INSTANCE.toEntity(naverUser));
+            registerUser(NaverUserMapper.INSTANCE.toEntity(naverUser));
         }
+    }
+
+    private void registerUser(NaverUser naverUser) {
+
+        naverUserRepository.save(naverUser);
+
+        User user = new User();
+        user.setNaverUserId(naverUser.getId());
+        user.setRegistrationDate(new Date());
+        user.setStatus("normal");
+
+        userRepository.save(user);
+
+        // 해당 유저의 페이지로 이동하는 로직 추가해야함
     }
 
     // CSRF 방지를 위한 상태 토큰 생성 코드

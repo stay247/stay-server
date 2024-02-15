@@ -11,4 +11,5 @@ public class Item {
     private Integer itemId;
     private String name;
     private String description;
+    private String authorization;
 }

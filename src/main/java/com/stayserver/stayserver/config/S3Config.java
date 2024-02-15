@@ -14,8 +14,6 @@ import org.springframework.context.annotation.Configuration;
 @RequiredArgsConstructor
 public class S3Config {
 
-    private final ApplicationEnvironmentConfig envConfig;
-
     @Value("${cloud.aws.credentials.access-key}")
     private String accessKey;
     @Value("${cloud.aws.credentials.secret-key}")
