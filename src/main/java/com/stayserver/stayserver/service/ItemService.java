@@ -34,23 +34,27 @@ public class ItemService {
     private final SoundRepository soundRepository;
     private final ItemUsageRepository itemUsageRepository;
 
-    @Value("${cloud.aws.s3.bucket}")
-    private String bucket;
+    @Value("${cloud.aws.s3.bucket.audio}")
+    private String audioBucket;
+
+    @Value("${cloud.aws.s3.bucket.image}")
+    private String imageBucket;
+
 
     // aws s3 파일 다운로드
     public byte[] downloadItem(String fileName) throws IOException {
-        S3Object item = amazonS3Client.getObject(bucket, fileName);
+        S3Object item = amazonS3Client.getObject(audioBucket, fileName);
         return IOUtils.toByteArray(item.getObjectContent());
     }
 
     // aws s3 파일 업로드
     public String uploadItem(MultipartFile file) throws IOException {
         String fileName = file.getOriginalFilename();
-        String fileUrl = "https://" + bucket + ".s3.amazonaws.com/" + fileName;
+        String fileUrl = "https://" + audioBucket + ".s3.amazonaws.com/" + fileName;
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentType(file.getContentType());
         metadata.setContentLength(file.getSize());
-        amazonS3Client.putObject(bucket, fileName, file.getInputStream(), metadata);
+        amazonS3Client.putObject(audioBucket, fileName, file.getInputStream(), metadata);
         return fileUrl;
     }
 
@@ -59,8 +63,8 @@ public class ItemService {
         // 사용자 ID를 기반으로 접근 가능한 아이템 목록 조회
         List<URL> urls = new ArrayList<>();
 
-        userRepository.findByNaverUserId(naverUserId).ifPresent(userId -> {
-            List<ItemUsage> itemUsages = itemUsageRepository.findAllByUserId(userId);
+        userRepository.findByNaverUserId(naverUserId).ifPresent(user -> {
+            List<ItemUsage> itemUsages = itemUsageRepository.findAllByUserId(user.getUserId());
 
             itemUsages.forEach(itemUsage -> {
                 // 아이템 정보 조회
@@ -70,14 +74,14 @@ public class ItemService {
                     // 모양 정보 조회
                     Shape shape = shapeRepository.findByItemId(item.getItemId()).orElse(null);
                     if (shape != null) {
-                        URL shapeLink = createPresignedS3Url(shape.getShapeData());
+                        URL shapeLink = createPresignedS3Url(imageBucket, shape.getShapeData()); // 이미지 버킷 사용
                         urls.add(shapeLink);
                     }
 
                     // 소리 정보 조회
                     Sound sound = soundRepository.findByItemId(item.getItemId()).orElse(null);
                     if (sound != null) {
-                        URL soundLink = createPresignedS3Url(sound.getSoundData());
+                        URL soundLink = createPresignedS3Url(audioBucket, sound.getSoundData()); // 오디오 버킷 사용
                         urls.add(soundLink);
                     }
                 }
@@ -87,7 +91,7 @@ public class ItemService {
     }
 
     // 사전 서명된 URL 생성
-    public URL createPresignedS3Url(String fileName) {
+    public URL createPresignedS3Url(String bucketName, String fileName) {
         // 만료 시간 설정
         Date expiration = new Date();
         long expireInMilliSeconds = 1000 * 60 * 60; // 1시간
@@ -96,7 +100,7 @@ public class ItemService {
 
         // 사전 서명된 URL 요청 생성
         GeneratePresignedUrlRequest generatePresignedUrlRequest =
-                new GeneratePresignedUrlRequest(bucket, fileName)
+                new GeneratePresignedUrlRequest(bucketName, fileName)
                         .withMethod(HttpMethod.GET) // or HttpMethod.PUT for upload
                         .withExpiration(expiration);
 

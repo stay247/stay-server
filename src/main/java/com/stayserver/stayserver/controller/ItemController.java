@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URL;
 import java.net.URLConnection;
+import java.util.List;
 
 @RestController
 @RequestMapping("/item")
@@ -17,6 +19,22 @@ import java.net.URLConnection;
 public class ItemController {
 
     private final ItemService itemService;
+
+    @GetMapping("/user-items/{naverUserId}")
+    public ResponseEntity<List<URL>> getUserItemLinks(@PathVariable String naverUserId) {
+        try {
+            List<URL> itemLinks = itemService.getUserItemLinks(naverUserId);
+            if(itemLinks.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+            return new ResponseEntity<>(itemLinks, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Error retrieving item links for user: {}", naverUserId, e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
 
     @GetMapping("/download/{fileName}")
     public ResponseEntity<byte[]> downloadItem(@PathVariable String fileName) {
