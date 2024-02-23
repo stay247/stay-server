@@ -1,6 +1,5 @@
 package com.stayserver.stayserver.util;
 
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;

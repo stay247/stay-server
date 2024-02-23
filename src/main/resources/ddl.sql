@@ -56,6 +56,7 @@ CREATE TABLE `item_usage`
     `item_usage_id` INT AUTO_INCREMENT PRIMARY KEY COMMENT '아이템 사용 식별자',
     `item_id` INT NOT NULL COMMENT '아이템 ID',
     `user_id` INT NOT NULL COMMENT '소유한 사용자 ID',
+    `volume` INT NOT NULL COMMENT '아이템 볼륨',
     `x_coordinate` DECIMAL NOT NULL COMMENT 'X 좌표',
     `y_coordinate` DECIMAL NOT NULL COMMENT 'Y 좌표',
     `z_coordinate` DECIMAL NOT NULL COMMENT 'Z 좌표',
@@ -63,3 +64,10 @@ CREATE TABLE `item_usage`
     FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+CREATE TABLE `master_sound_settings`
+(
+    `setting_id` INT AUTO_INCREMENT PRIMARY KEY COMMENT '설정 식별자',
+    `user_id` INT NOT NULL COMMENT '사용자 ID',
+    `master_volume` DECIMAL(5, 2) NOT NULL DEFAULT 1.0 COMMENT '마스터 볼륨',
+    FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

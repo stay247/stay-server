@@ -74,14 +74,14 @@ public class ItemService {
                     // 모양 정보 조회
                     Shape shape = shapeRepository.findByItemId(item.getItemId()).orElse(null);
                     if (shape != null) {
-                        URL shapeLink = createPresignedS3Url(imageBucket, shape.getShapeData()); // 이미지 버킷 사용
+                        URL shapeLink = createPresignedS3Url(imageBucket, shape.getShapeData()); // 이미지 버킷 사용, Data = '파일명.확장자'
                         urls.add(shapeLink);
                     }
 
                     // 소리 정보 조회
                     Sound sound = soundRepository.findByItemId(item.getItemId()).orElse(null);
                     if (sound != null) {
-                        URL soundLink = createPresignedS3Url(audioBucket, sound.getSoundData()); // 오디오 버킷 사용
+                        URL soundLink = createPresignedS3Url(audioBucket, sound.getSoundData()); // 오디오 버킷 사용, Data = '파일명.확장자'
                         urls.add(soundLink);
                     }
                 }
@@ -101,12 +101,11 @@ public class ItemService {
         // 사전 서명된 URL 요청 생성
         GeneratePresignedUrlRequest generatePresignedUrlRequest =
                 new GeneratePresignedUrlRequest(bucketName, fileName)
-                        .withMethod(HttpMethod.GET) // or HttpMethod.PUT for upload
+                        .withMethod(HttpMethod.GET)
                         .withExpiration(expiration);
 
         // 사전 서명된 URL 생성
-        URL url = amazonS3Client.generatePresignedUrl(generatePresignedUrlRequest);
-        return url;
+        return amazonS3Client.generatePresignedUrl(generatePresignedUrlRequest);
     }
 
 
