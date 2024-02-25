@@ -1,4 +1,4 @@
-package com.stayserver.stayserver.repository;
+package com.stayserver.stayserver.repository.jpa;
 
 import com.stayserver.stayserver.entity.Sound;
 import org.springframework.data.jpa.repository.JpaRepository;

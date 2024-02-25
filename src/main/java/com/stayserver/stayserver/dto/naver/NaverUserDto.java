@@ -1,4 +1,4 @@
-package com.stayserver.stayserver.dto.naver.naverUser;
+package com.stayserver.stayserver.dto.naver;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -6,7 +6,6 @@ import lombok.ToString;
 
 @Getter
 @Setter
-@ToString
 public class NaverUserDto {
     private String id;
     private String nickname;

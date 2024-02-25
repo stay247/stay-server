@@ -1,10 +1,9 @@
-package com.stayserver.stayserver.dto.naver.naverUser;
+package com.stayserver.stayserver.dto.naver;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-@AllArgsConstructor
 @Getter
 @Setter
 public class NaverTokenDto {

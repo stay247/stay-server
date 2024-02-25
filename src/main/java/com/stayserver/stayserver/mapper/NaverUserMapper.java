@@ -1,6 +1,6 @@
 package com.stayserver.stayserver.mapper;
 
-import com.stayserver.stayserver.dto.naver.naverUser.NaverUserDto;
+import com.stayserver.stayserver.dto.naver.NaverUserDto;
 import com.stayserver.stayserver.entity.NaverUser;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;

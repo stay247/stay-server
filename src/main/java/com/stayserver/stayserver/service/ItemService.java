@@ -6,11 +6,10 @@ import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.util.IOUtils;
-import com.stayserver.stayserver.entity.Item;
-import com.stayserver.stayserver.entity.ItemUsage;
-import com.stayserver.stayserver.entity.Shape;
-import com.stayserver.stayserver.entity.Sound;
-import com.stayserver.stayserver.repository.*;
+import com.stayserver.stayserver.dto.ItemUrlDto;
+import com.stayserver.stayserver.entity.*;
+import com.stayserver.stayserver.redis.UrlAccessToken;
+import com.stayserver.stayserver.repository.jpa.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -33,6 +32,7 @@ public class ItemService {
     private final ShapeRepository shapeRepository;
     private final SoundRepository soundRepository;
     private final ItemUsageRepository itemUsageRepository;
+    private final UrlAccessService urlAccessService;
 
     @Value("${cloud.aws.s3.bucket.audio}")
     private String audioBucket;
@@ -59,9 +59,9 @@ public class ItemService {
     }
 
     // 특정 사용자에 알맞는 모든 아이템 링크 전달
-    public List<URL> getUserItemLinks(String naverUserId) {
+    public List<ItemUrlDto> getUserItemUrls(String naverUserId) {
         // 사용자 ID를 기반으로 접근 가능한 아이템 목록 조회
-        List<URL> urls = new ArrayList<>();
+        List<ItemUrlDto> itemUrls = new ArrayList<>();
 
         userRepository.findByNaverUserId(naverUserId).ifPresent(user -> {
             List<ItemUsage> itemUsages = itemUsageRepository.findAllByUserId(user.getUserId());
@@ -70,31 +70,39 @@ public class ItemService {
                 // 아이템 정보 조회
                 Item item = itemRepository.findById(itemUsage.getItemId()).orElse(null);
                 if (item != null) {
+                    ItemUrlDto itemUrl = new ItemUrlDto();
+
+                    itemUrl.setItemName(item.getName());
 
                     // 모양 정보 조회
                     Shape shape = shapeRepository.findByItemId(item.getItemId()).orElse(null);
                     if (shape != null) {
-                        URL shapeLink = createPresignedS3Url(imageBucket, shape.getShapeData()); // 이미지 버킷 사용, Data = '파일명.확장자'
-                        urls.add(shapeLink);
+                        URL shapeUrl = createPresignedS3Url(imageBucket, shape.getShapeData()); // 이미지 버킷 사용, Data = '파일명.확장자'
+                        itemUrl.setShapeUrl(shapeUrl);
                     }
 
                     // 소리 정보 조회
                     Sound sound = soundRepository.findByItemId(item.getItemId()).orElse(null);
                     if (sound != null) {
-                        URL soundLink = createPresignedS3Url(audioBucket, sound.getSoundData()); // 오디오 버킷 사용, Data = '파일명.확장자'
-                        urls.add(soundLink);
+                        URL soundUrl = createPresignedS3Url(audioBucket, sound.getSoundData()); // 오디오 버킷 사용, Data = '파일명.확장자'
+                        itemUrl.setSoundUrl(soundUrl);
                     }
+
+                    itemUrls.add(itemUrl);
                 }
             });
         });
-        return urls;
+        // URL 다회 접근 차단을 위한 토큰 생성
+        urlAccessService.createUrlAccessToken(itemUrls);
+
+        return itemUrls;
     }
 
     // 사전 서명된 URL 생성
     public URL createPresignedS3Url(String bucketName, String fileName) {
         // 만료 시간 설정
         Date expiration = new Date();
-        long expireInMilliSeconds = 1000 * 60 * 60; // 1시간
+        long expireInMilliSeconds = 600; // 10분
         long expTimeMillis = System.currentTimeMillis() + expireInMilliSeconds;
         expiration.setTime(expTimeMillis);
 
@@ -109,4 +117,7 @@ public class ItemService {
     }
 
 
+    public void setDefaultData(User user) {
+
+    }
 }

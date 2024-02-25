@@ -3,14 +3,14 @@ package com.stayserver.stayserver.service;
 
 import com.google.gson.Gson;
 import com.stayserver.stayserver.config.ApplicationEnvironmentConfig;
-import com.stayserver.stayserver.dto.naver.naverUser.NaverMsgDto;
-import com.stayserver.stayserver.dto.naver.naverUser.NaverTokenDto;
-import com.stayserver.stayserver.dto.naver.naverUser.NaverUserDto;
+import com.stayserver.stayserver.dto.naver.NaverMsgDto;
+import com.stayserver.stayserver.dto.naver.NaverTokenDto;
+import com.stayserver.stayserver.dto.naver.NaverUserDto;
 import com.stayserver.stayserver.entity.NaverUser;
 import com.stayserver.stayserver.entity.User;
 import com.stayserver.stayserver.mapper.NaverUserMapper;
-import com.stayserver.stayserver.repository.NaverUserRepository;
-import com.stayserver.stayserver.repository.UserRepository;
+import com.stayserver.stayserver.repository.jpa.NaverUserRepository;
+import com.stayserver.stayserver.repository.jpa.UserRepository;
 import com.stayserver.stayserver.util.RestUtil;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +33,7 @@ public class OauthService {
     private final RestUtil restUtil;
     private final NaverUserRepository naverUserRepository;
     private final UserRepository userRepository;
+    private final ItemService itemService;
 
     public String createNaverOauthURL(HttpSession httpSession) {
 
@@ -67,14 +68,7 @@ public class OauthService {
         String response = restUtil.post(tokenUrl, body);
         Gson gson = new Gson();
 
-        NaverTokenDto naverToken = gson.fromJson(response, NaverTokenDto.class);
-
-        System.out.println(naverToken.getAccess_token());
-        System.out.println(naverToken.getRefresh_token());
-        System.out.println(naverToken.getToken_type());
-        System.out.println(naverToken.getExpires_in());
-
-        return naverToken;
+        return gson.fromJson(response, NaverTokenDto.class);
     }
 
 
@@ -117,6 +111,8 @@ public class OauthService {
         user.setStatus("normal");
 
         userRepository.save(user);
+        // 기본 세팅 (퍼블릭 아이템 추가)
+        itemService.setDefaultData(user);
 
         // 해당 유저의 페이지로 이동하는 로직 추가해야함
     }
