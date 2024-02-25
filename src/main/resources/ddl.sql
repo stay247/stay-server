@@ -17,10 +17,10 @@ CREATE TABLE `naver_user`
 
 CREATE TABLE `user`
 (
-    `user_id`           INT AUTO_INCREMENT PRIMARY KEY COMMENT '사용자 식별자',
-    `naver_user_id`     VARCHAR(255) NOT NULL COMMENT '네이버 사용자 ID',
-    `registration_date` DATE NOT NULL COMMENT '가입 날짜',
-    `status`            VARCHAR(50) NOT NULL COMMENT '계정 상태',
+    `user_id`       INT AUTO_INCREMENT PRIMARY KEY COMMENT '사용자 식별자',
+    `naver_user_id` VARCHAR(255) NOT NULL COMMENT '네이버 사용자 ID',
+    `created_at`    DATE         NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '가입 날짜',
+    `status`        VARCHAR(50)  NOT NULL COMMENT '계정 상태',
     FOREIGN KEY (`naver_user_id`) REFERENCES `naver_user` (`id`),
     UNIQUE (`naver_user_id`)
 ) ENGINE = InnoDB
@@ -29,45 +29,71 @@ CREATE TABLE `user`
 
 CREATE TABLE item
 (
-    `item_id` INT AUTO_INCREMENT PRIMARY KEY COMMENT '아이템 식별자',
-    `name` VARCHAR(255) NOT NULL COMMENT '아이템 이름',
-    `description` TEXT COMMENT '아이템 설명',
-    `authorization` VARCHAR(255) NOT NULL COMMENT '아이템 인가'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+    `item_id`     INT AUTO_INCREMENT PRIMARY KEY COMMENT '아이템 식별자',
+    `user_id`     INT          NOT NULL COMMENT '등록 사용자 식별자',
+    `name`        VARCHAR(255) NOT NULL COMMENT '아이템 이름',
+    `description` TEXT         NOT NULL COMMENT '아이템 설명',
+    `icon_data`   TEXT         NOT NULL COMMENT '아이콘',
+    `sound_data`  TEXT         NOT NULL COMMENT '소리 데이터',
+    `sharable`    BOOLEAN      NOT NULL COMMENT '공유 여부',
+    `tag`         TEXT         NOT NULL COMMENT '아이템 태그',
+    FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_general_ci;
 
-CREATE TABLE `shape`
+CREATE TABLE `item_share`
 (
-    `shape_id` INT AUTO_INCREMENT PRIMARY KEY COMMENT '모양 식별자',
-    `item_id` INT NOT NULL COMMENT '아이템 ID',
-    `shape_data` TEXT NOT NULL COMMENT '모양 데이터',
-    FOREIGN KEY (`item_id`) REFERENCES item (`item_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-CREATE TABLE `sound`
-(
-    `sound_id` INT AUTO_INCREMENT PRIMARY KEY COMMENT '소리 식별자',
-    `item_id` INT NOT NULL COMMENT '아이템 ID',
-    `sound_data` TEXT NOT NULL COMMENT '소리 데이터',
-    FOREIGN KEY (`item_id`) REFERENCES item (`item_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-CREATE TABLE `item_usage`
-(
-    `item_usage_id` INT AUTO_INCREMENT PRIMARY KEY COMMENT '아이템 사용 식별자',
-    `item_id` INT NOT NULL COMMENT '아이템 ID',
-    `user_id` INT NOT NULL COMMENT '소유한 사용자 ID',
-    `volume` INT NOT NULL COMMENT '아이템 볼륨',
-    `x_coordinate` DECIMAL NOT NULL COMMENT 'X 좌표',
-    `y_coordinate` DECIMAL NOT NULL COMMENT 'Y 좌표',
-    `z_coordinate` DECIMAL NOT NULL COMMENT 'Z 좌표',
+    `item_share_id`       INT AUTO_INCREMENT PRIMARY KEY COMMENT '아이템 공유 식별자',
+    `item_id`             INT      NOT NULL COMMENT '공유된 아이템 식별자',
+    `shared_with_user_id` INT      NOT NULL COMMENT '공유받은 사용자 식별자',
+    `shared_at`           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '공유 시간',
     FOREIGN KEY (`item_id`) REFERENCES `item` (`item_id`),
-    FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+    FOREIGN KEY (`shared_with_user_id`) REFERENCES `user` (`user_id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_general_ci;
 
-CREATE TABLE `master_sound_settings`
+CREATE TABLE `collection`
 (
-    `setting_id` INT AUTO_INCREMENT PRIMARY KEY COMMENT '설정 식별자',
-    `user_id` INT NOT NULL COMMENT '사용자 ID',
-    `master_volume` DECIMAL(5, 2) NOT NULL DEFAULT 1.0 COMMENT '마스터 볼륨',
+    `collection_id`         INT AUTO_INCREMENT PRIMARY KEY COMMENT '컬렉션 식별자',
+    `user_id`               INT          NOT NULL COMMENT '컬렉션을 생성한 사용자 식별자',
+    `name`                  VARCHAR(255) NOT NULL COMMENT '컬렉션 이름',
+    `description`           TEXT         NOT NULL COMMENT '컬렉션 설명',
+    `background_image_data` VARCHAR(255) NOT NULL COMMENT '배경 이미지 데이터',
+    `sharable`              BOOLEAN      NOT NULL COMMENT '공유 여부',
+    `created_at`            DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 시간',
+    `tag`                   TEXT         NOT NULL COMMENT '컬렉션 태그',
     FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_general_ci;
+
+CREATE TABLE `collection_item`
+(
+    `collection_item_id` INT AUTO_INCREMENT PRIMARY KEY COMMENT '컬렉션 아이템 식별자',
+    `collection_id`      INT NOT NULL COMMENT '컬렉션 식별자',
+    `item_id`            INT NOT NULL COMMENT '아이템 식별자',
+    `order`              INT NOT NULL COMMENT '아이템의 순서',
+    `volume`             INT NOT NULL COMMENT '아이템의 볼륨 설정',
+    FOREIGN KEY (`collection_id`) REFERENCES `collection` (`collection_id`),
+    FOREIGN KEY (`item_id`) REFERENCES `item` (`item_id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_general_ci;
+
+CREATE TABLE `collection_share`
+(
+    `collection_share_id` INT AUTO_INCREMENT PRIMARY KEY COMMENT '컬렉션 공유 식별자',
+    `collection_id`       INT  NOT NULL COMMENT '공유된 컬렉션 식별자',
+    `shared_with_user_id` INT  NOT NULL COMMENT '컬렉션을 공유받은 사용자 식별자',
+    `share_date`          DATE NOT NULL COMMENT '공유 날짜',
+    FOREIGN KEY (`collection_id`) REFERENCES `collection` (`collection_id`),
+    FOREIGN KEY (`shared_with_user_id`) REFERENCES `user` (`user_id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_general_ci;
+
+
+
+
