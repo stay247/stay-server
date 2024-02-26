@@ -9,8 +9,8 @@ CREATE TABLE `naver_user`
     `mobile`        VARCHAR(20) COMMENT '모바일 번호',
     `mobile_e164`   VARCHAR(20) COMMENT '국제 표준 모바일 번호',
     `name`          VARCHAR(100) COMMENT '사용자 이름',
-    `birthday`      VARCHAR(10) COMMENT '생일',
-    `birthyear`     INT COMMENT '출생년도'
+    `birth_day`      VARCHAR(10) COMMENT '생일',
+    `birth_year`     INT COMMENT '출생년도'
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_general_ci;
@@ -19,7 +19,7 @@ CREATE TABLE `user`
 (
     `user_id`       INT AUTO_INCREMENT PRIMARY KEY COMMENT '사용자 식별자',
     `naver_user_id` VARCHAR(255) NOT NULL COMMENT '네이버 사용자 ID',
-    `created_at`    DATE         NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '가입 날짜',
+    `created_at`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '가입 시간',
     `status`        VARCHAR(50)  NOT NULL COMMENT '계정 상태',
     FOREIGN KEY (`naver_user_id`) REFERENCES `naver_user` (`id`),
     UNIQUE (`naver_user_id`)
@@ -33,8 +33,8 @@ CREATE TABLE item
     `user_id`     INT          NOT NULL COMMENT '등록 사용자 식별자',
     `name`        VARCHAR(255) NOT NULL COMMENT '아이템 이름',
     `description` TEXT         NOT NULL COMMENT '아이템 설명',
-    `icon_data`   TEXT         NOT NULL COMMENT '아이콘',
-    `sound_data`  TEXT         NOT NULL COMMENT '소리 데이터',
+    `icon_data`   VARCHAR(255) NOT NULL COMMENT '아이콘',
+    `sound_data`  VARCHAR(255) NOT NULL COMMENT '소리 데이터',
     `sharable`    BOOLEAN      NOT NULL COMMENT '공유 여부',
     `tag`         TEXT         NOT NULL COMMENT '아이템 태그',
     FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)

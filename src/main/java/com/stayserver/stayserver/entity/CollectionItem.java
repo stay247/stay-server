@@ -6,15 +6,15 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Data;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Data
-public class User {
+public class CollectionItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer userId;
-    private String naverUserId;
-    private LocalDateTime createdAt;
-    private String status;
+    private Integer collectionItemId;
+    private Integer collectionId;
+    private Integer itemId;
+    private Integer order;
+    private Integer volume;
+
 }

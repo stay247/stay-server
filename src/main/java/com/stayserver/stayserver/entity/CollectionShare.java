@@ -10,11 +10,11 @@ import java.time.LocalDateTime;
 
 @Entity
 @Data
-public class User {
+public class CollectionShare {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer userId;
-    private String naverUserId;
-    private LocalDateTime createdAt;
-    private String status;
+    private Integer collectionShareId;
+    private Integer collectionId;
+    private Integer sharedWithUserId;
+    private LocalDateTime shareDate;
 }

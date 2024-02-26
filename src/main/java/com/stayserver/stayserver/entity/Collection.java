@@ -10,11 +10,16 @@ import java.time.LocalDateTime;
 
 @Entity
 @Data
-public class User {
+public class Collection {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer collectionId;
     private Integer userId;
-    private String naverUserId;
+    private String name;
+    private String description;
+    private String backgroundImageData;
+    private Boolean sharable;
     private LocalDateTime createdAt;
-    private String status;
+    private String tag;
+
 }

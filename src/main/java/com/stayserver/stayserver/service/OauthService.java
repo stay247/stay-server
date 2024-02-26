@@ -2,18 +2,17 @@ package com.stayserver.stayserver.service;
 
 
 import com.google.gson.Gson;
-import com.stayserver.stayserver.config.ApplicationEnvironmentConfig;
 import com.stayserver.stayserver.dto.naver.NaverMsgDto;
 import com.stayserver.stayserver.dto.naver.NaverTokenDto;
 import com.stayserver.stayserver.dto.naver.NaverUserDto;
 import com.stayserver.stayserver.entity.NaverUser;
 import com.stayserver.stayserver.entity.User;
-import com.stayserver.stayserver.mapper.NaverUserMapper;
 import com.stayserver.stayserver.repository.jpa.NaverUserRepository;
 import com.stayserver.stayserver.repository.jpa.UserRepository;
 import com.stayserver.stayserver.util.RestUtil;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -22,32 +21,42 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class OauthService {
 
-    private final ApplicationEnvironmentConfig envConfig;
     private final RestUtil restUtil;
     private final NaverUserRepository naverUserRepository;
     private final UserRepository userRepository;
     private final ItemService itemService;
 
+    @Value("${naver.url.base}")
+    private String naverUrlBase;
+
+    @Value("${naver.client.id}")
+    private String naverClientId;
+
+    @Value("${naver.client.secret}")
+    private String naverClientSecret;
+
+    @Value("${naver.url.redirect}")
+    private String naverUrlRedirect;
+
+    @Value("${naver.url.userdata}")
+    private String naverUrlUserData;
+
+
     public String createNaverOauthURL(HttpSession httpSession) {
-
-        String baseURL = envConfig.getConfigValue("naver.url.base") + "authorize";
-        String clientID = envConfig.getConfigValue("naver.client.id");
-        String redirectURL = envConfig.getConfigValue("naver.url.redirect");
-
         String state = generateState();
         httpSession.setAttribute("state", state);  // 세션에 상태 토큰 저장
 
-        return UriComponentsBuilder.fromUriString(baseURL)
-                .queryParam("client_id", clientID)
+        return UriComponentsBuilder.fromUriString(naverUrlBase + "authorize")
+                .queryParam("client_id", naverClientId)
                 .queryParam("response_type", "code")
-                .queryParam("redirect_uri", redirectURL)
+                .queryParam("redirect_uri", naverUrlRedirect)
                 .queryParam("state", state)
                 .build()
                 .encode(StandardCharsets.UTF_8)
@@ -55,17 +64,13 @@ public class OauthService {
     }
 
     public NaverTokenDto getNaverToken(String code) {
-        String tokenUrl = envConfig.getConfigValue("naver.url.base") + "token";
-        String clientID = envConfig.getConfigValue("naver.client.id");
-        String clientSecret = envConfig.getConfigValue("naver.client.secret");
-
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("client_id", clientID);
-        body.add("client_secret", clientSecret);
+        body.add("client_id", naverClientId);
+        body.add("client_secret", naverClientSecret);
         body.add("grant_type", "authorization_code");
         body.add("code", code);
 
-        String response = restUtil.post(tokenUrl, body);
+        String response = restUtil.post(naverUrlBase + "token", body);
         Gson gson = new Gson();
 
         return gson.fromJson(response, NaverTokenDto.class);
@@ -77,7 +82,7 @@ public class OauthService {
         String accessToken = naverTokenDTO.getAccess_token();
         String tokenType = naverTokenDTO.getToken_type();
 
-        String url = envConfig.getConfigValue("naver.url.userdata");
+        String url = naverUrlUserData;
 
         String response = restUtil.get(url, accessToken, tokenType);
 
@@ -90,31 +95,44 @@ public class OauthService {
 
     }
 
-    private void isUserRegistered(NaverUserDto naverUser) {
-        String naverUserId = naverUser.getId();
-        Optional<NaverUser> checker = naverUserRepository.findById(naverUserId);
+    private void isUserRegistered(NaverUserDto naverUserDto) {
+        String naverUserId = naverUserDto.getId();
+        Optional<NaverUser> naverUser = naverUserRepository.findById(naverUserId);
 
-        if (checker.isPresent()) {
-            // 해당 유저의 페이지로 이동하는 로직 추가해야함
-        } else {
-            registerUser(NaverUserMapper.INSTANCE.toEntity(naverUser));
-        }
+        naverUser.ifPresentOrElse(
+                foundUser -> {
+                    // 해당 유저의 페이지로 이동하는 로직
+                },
+                () -> registerUser(naverUserDto) // 회원가입
+        );
     }
 
-    private void registerUser(NaverUser naverUser) {
+    private void registerUser(NaverUserDto naverUserDto) {
+        NaverUser naverUser = new NaverUser();
+        naverUser.setId(naverUserDto.getId());
+        naverUser.setNickname(naverUserDto.getNickname());
+        naverUser.setProfileImage(naverUserDto.getProfile_image());
+        naverUser.setAge(naverUserDto.getAge());
+        naverUser.setGender(naverUserDto.getGender());
+        naverUser.setEmail(naverUserDto.getEmail());
+        naverUser.setMobile(naverUserDto.getMobile());
+        naverUser.setMobileE164(naverUserDto.getMobile_e164());
+        naverUser.setName(naverUserDto.getName());
+        naverUser.setBirthDay(naverUserDto.getBirthday());
+        naverUser.setBirthYear(naverUserDto.getBirthyear());
 
         naverUserRepository.save(naverUser);
 
         User user = new User();
         user.setNaverUserId(naverUser.getId());
-        user.setRegistrationDate(new Date());
+        user.setCreatedAt(LocalDateTime.now());
         user.setStatus("normal");
 
         userRepository.save(user);
         // 기본 세팅 (퍼블릭 아이템 추가)
         itemService.setDefaultData(user);
 
-        // 해당 유저의 페이지로 이동하는 로직 추가해야함
+        // 해당 유저의 페이지로 이동하는 로직
     }
 
     // CSRF 방지를 위한 상태 토큰 생성 코드

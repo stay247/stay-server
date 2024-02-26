@@ -1,5 +1,6 @@
 package com.stayserver.stayserver.entity;
 
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -10,11 +11,13 @@ import java.time.LocalDateTime;
 
 @Entity
 @Data
-public class User {
+public class ItemShare {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer userId;
-    private String naverUserId;
-    private LocalDateTime createdAt;
-    private String status;
+    private Integer itemShareId;
+    private Integer itemId;
+    private Integer sharedWithUserID;
+    private LocalDateTime sharedAt;
+
+
 }
