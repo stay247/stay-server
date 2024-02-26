@@ -22,8 +22,9 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'com.amazonaws:aws-java-sdk-s3:1.12.655'
+
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation group: 'com.mysql', name: 'mysql-connector-j'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'com.google.code.gson:gson'

@@ -120,16 +120,15 @@ public class OauthService {
         naverUser.setName(naverUserDto.getName());
         naverUser.setBirthDay(naverUserDto.getBirthday());
         naverUser.setBirthYear(naverUserDto.getBirthyear());
-
         naverUserRepository.save(naverUser);
 
         User user = new User();
         user.setNaverUserId(naverUser.getId());
         user.setCreatedAt(LocalDateTime.now());
         user.setStatus("normal");
-
         userRepository.save(user);
-        // 기본 세팅 (퍼블릭 아이템 추가)
+
+        // 기본 아이템 세팅
         itemService.setDefaultData(user);
 
         // 해당 유저의 페이지로 이동하는 로직

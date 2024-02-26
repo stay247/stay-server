@@ -12,12 +12,12 @@ import org.springframework.web.servlet.view.RedirectView;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/login/naver")
+@RequestMapping("/oauth/naver")
 public class OauthController {
 
     private final OauthService oauthService;
 
-    @GetMapping("")
+    @GetMapping("/login")
     public RedirectView naverLogin(HttpSession httpSession) {
         String redirectUrl = oauthService.createNaverOauthURL(httpSession);
         return new RedirectView(redirectUrl);
