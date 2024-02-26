@@ -1,14 +1,15 @@
 package com.stayserver.stayserver.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.io.InputStream;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class LocalMediaStorageService implements MediaStorageService {
 
@@ -20,6 +21,7 @@ public class LocalMediaStorageService implements MediaStorageService {
             Files.copy(mediaStream, this.rootLocation.resolve(filename));
             return filename;
         } catch (Exception e) {
+            log.error("Failed to store file {}: {}", filename, e.getMessage(), e);
             throw new RuntimeException("Failed to store file " + filename, e);
         }
     }
@@ -30,6 +32,7 @@ public class LocalMediaStorageService implements MediaStorageService {
             Path file = rootLocation.resolve(filename);
             return Files.newInputStream(file);
         } catch (Exception e) {
+            log.error("Failed to load file {}: {}", filename, e.getMessage(), e);
             throw new RuntimeException("Failed to load file " + filename, e);
         }
     }
@@ -39,6 +42,7 @@ public class LocalMediaStorageService implements MediaStorageService {
         try {
             Files.deleteIfExists(rootLocation.resolve(filename));
         } catch (Exception e) {
+            log.error("Failed to delete file {}: {}", filename, e.getMessage(), e);
             throw new RuntimeException("Failed to delete file " + filename, e);
         }
     }

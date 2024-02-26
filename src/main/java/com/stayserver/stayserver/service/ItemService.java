@@ -9,6 +9,7 @@ import com.stayserver.stayserver.repository.jpa.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.io.InputStream;
 import java.time.LocalDateTime;
 
 @Service
@@ -19,6 +20,7 @@ public class ItemService {
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
     private final ItemShareRepository itemShareRepository;
+    private final MediaStorageService mediaStorageService;
 
     public void setDefaultData(User user) {
         int[] defaultItems = {1, 2, 3, 4, 5, 6}; // 하드코딩된..
@@ -30,5 +32,9 @@ public class ItemService {
             itemShare.setSharedWithUserID(user.getUserId());
             itemShareRepository.save(itemShare);
         }
+    }
+
+    public InputStream getMediaTest(String fileName) {
+        return mediaStorageService.loadMedia(fileName);
     }
 }
