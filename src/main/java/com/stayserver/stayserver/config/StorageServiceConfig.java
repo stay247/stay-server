@@ -1,7 +1,7 @@
 package com.stayserver.stayserver.config;
 
-import com.stayserver.stayserver.service.LocalMediaStorageService;
-import com.stayserver.stayserver.service.MediaStorageService;
+import com.stayserver.stayserver.service.LocalSoundStorageService;
+import com.stayserver.stayserver.service.SoundStorageService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -11,8 +11,8 @@ public class StorageServiceConfig {
 
     @Bean
     @Profile("local")
-    public MediaStorageService localMediaStorageService() {
-        return new LocalMediaStorageService();
+    public SoundStorageService localSoundStorageService() {
+        return new LocalSoundStorageService();
     }
 
 //    @Bean

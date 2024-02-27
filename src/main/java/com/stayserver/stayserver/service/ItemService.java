@@ -20,7 +20,6 @@ public class ItemService {
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
     private final ItemShareRepository itemShareRepository;
-    private final MediaStorageService mediaStorageService;
 
     public void setDefaultData(User user) {
         int[] defaultItems = {1, 2, 3, 4, 5, 6}; // 하드코딩된..
@@ -34,7 +33,5 @@ public class ItemService {
         }
     }
 
-    public InputStream getMediaTest(String fileName) {
-        return mediaStorageService.loadMedia(fileName);
-    }
+
 }
