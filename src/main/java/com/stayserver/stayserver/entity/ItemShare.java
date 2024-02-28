@@ -16,7 +16,7 @@ public class ItemShare {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer itemShareId;
     private Integer itemId;
-    private Integer sharedWithUserID;
+    private Integer sharedWithUserId;
     private LocalDateTime sharedAt;
 
 

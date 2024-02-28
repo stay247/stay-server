@@ -1,18 +1,14 @@
-package com.stayserver.stayserver.entity;
+package com.stayserver.stayserver.dto;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import lombok.Data;
+import lombok.Builder;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 
-@Entity
-@Data
-public class Collection {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+@Getter
+@Builder
+public class CollectionDTO {
+
     private Integer collectionId;
     private Integer userId;
     private String name;

@@ -15,6 +15,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer userId;
     private String naverUserId;
-    private LocalDateTime createdAt;
     private String status;
+    private LocalDateTime createdAt;
+
 }
