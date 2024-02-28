@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,24 +25,30 @@ public class ItemService {
     private final CollectionShareRepository collectionShareRepository;
 
     public void setDefaultData(User user) {
-        List<Item> defaultItems = itemRepository.findAllByUserId(null);
+        try {
 
-        for (Item defaultItem : defaultItems) {
-            ItemShare itemShare = new ItemShare();
-            itemShare.setItemId(defaultItem.getItemId());
-            itemShare.setSharedWithUserId(user.getUserId());
-            itemShare.setSharedAt(LocalDateTime.now());
-            itemShareRepository.save(itemShare);
+            List<Item> defaultItems = itemRepository.findAllByUserId(null);
+
+            for (Item defaultItem : defaultItems) {
+                ItemShare itemShare = new ItemShare();
+                itemShare.setItemId(defaultItem.getItemId());
+                itemShare.setSharedWithUserId(user.getUserId());
+                itemShare.setSharedAt(LocalDateTime.now());
+                itemShareRepository.save(itemShare);
+            }
+        } catch (Exception e) {
+            log.error("Error setting DefaultData for user {}: {}", user.getUserId(), e.getMessage(), e);
+            throw e;
         }
 
     }
 
-    public List<CollectionDTO> getCollectionsByUserId(User user){
+    public List<CollectionDTO> findCollectionsByUserId(Integer userId) {
         try {
             List<CollectionDTO> allCollectionsDTO = new ArrayList<>();
 
             // 사용자의 컬렉션 추가
-            List<Collection> myCollections = collectionRepository.findByUserId(user.getUserId());
+            List<Collection> myCollections = collectionRepository.findByUserId(userId);
             for (Collection collection : myCollections) {
                 CollectionDTO dto = CollectionDTO.builder()
                         .collectionId(collection.getCollectionId())
@@ -61,7 +66,7 @@ public class ItemService {
             }
 
             // 공유받은 컬렉션 추가
-            List<CollectionShare> sharedCollections = collectionShareRepository.findBySharedWithUserId(user.getUserId());
+            List<CollectionShare> sharedCollections = collectionShareRepository.findAllBySharedWithUserId(userId);
             for (CollectionShare sharedCollection : sharedCollections) {
                 collectionRepository.findById(sharedCollection.getCollectionId())
                         .ifPresent(collection -> {
@@ -83,7 +88,7 @@ public class ItemService {
             return allCollectionsDTO;
 
         } catch (Exception e) {
-            log.error("Error retrieving collections for user {}: {}", user.getUserId(), e.getMessage(), e);
+            log.error("Error retrieving collections for user {}: {}", userId, e.getMessage(), e);
             throw e;
         }
     }

@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface CollectionShareRepository extends JpaRepository<CollectionShare, Integer> {
 
-    public List<CollectionShare> findBySharedWithUserId(Integer sharedWithUserId);
+    List<CollectionShare> findAllBySharedWithUserId(Integer sharedWithUserId);
 }

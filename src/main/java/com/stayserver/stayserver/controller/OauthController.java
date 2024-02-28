@@ -12,18 +12,18 @@ import org.springframework.web.servlet.view.RedirectView;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/oauth/naver")
+@RequestMapping("/oauth")
 public class OauthController {
 
     private final OauthService oauthService;
 
-    @GetMapping("/login")
+    @GetMapping("/naver/login")
     public RedirectView naverLogin(HttpSession httpSession) {
         String redirectUrl = oauthService.createNaverOauthURL(httpSession);
         return new RedirectView(redirectUrl);
     }
 
-    @GetMapping("/callback")
+    @GetMapping("/naver/callback")
     public RedirectView naverCallback(HttpSession httpSession, @RequestParam("code") String code, @RequestParam("state") String state) {
 
         if (oauthService.verifyState(httpSession, state)) {

@@ -16,5 +16,5 @@ public class CollectionShare {
     private Integer collectionShareId;
     private Integer collectionId;
     private Integer sharedWithUserId;
-    private LocalDateTime shareAt;
+    private LocalDateTime sharedAt;
 }
