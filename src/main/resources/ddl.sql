@@ -1,16 +1,9 @@
 CREATE TABLE `naver_user`
 (
-    `id`            VARCHAR(255) PRIMARY KEY COMMENT '네이버 사용자 ID',
-    `nickname`      VARCHAR(100) NOT NULL COMMENT '사용자 닉네임',
-    `profile_image` VARCHAR(255) COMMENT '프로필 이미지 URL',
-    `age`           VARCHAR(10) COMMENT '사용자 연령대',
-    `gender`        CHAR(1) COMMENT '성별 (M/F)',
-    `email`         VARCHAR(100) COMMENT '이메일 주소',
-    `mobile`        VARCHAR(20) COMMENT '모바일 번호',
-    `mobile_e164`   VARCHAR(20) COMMENT '국제 표준 모바일 번호',
-    `name`          VARCHAR(100) COMMENT '사용자 이름',
-    `birth_day`     VARCHAR(10) COMMENT '생일',
-    `birth_year`    INT COMMENT '출생년도'
+    `id`         VARCHAR(255) PRIMARY KEY COMMENT '네이버 사용자 ID',
+    `email`      VARCHAR(100) COMMENT '이메일 주소',
+    `name`       VARCHAR(100) COMMENT '사용자 이름',
+    `birth_year` VARCHAR(100) COMMENT '출생년도'
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_general_ci;
