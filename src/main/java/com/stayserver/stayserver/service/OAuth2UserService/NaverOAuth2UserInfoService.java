@@ -1,14 +1,12 @@
-package com.stayserver.stayserver.service;
+package com.stayserver.stayserver.service.OAuth2UserService;
 
 import com.stayserver.stayserver.entity.NaverUser;
 import com.stayserver.stayserver.entity.User;
+import com.stayserver.stayserver.repository.jpa.ItemShareRepository;
 import com.stayserver.stayserver.repository.jpa.NaverUserRepository;
 import com.stayserver.stayserver.repository.jpa.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
-import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
@@ -19,45 +17,60 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class CustomOAuth2UserService extends DefaultOAuth2UserService {
+public class NaverOAuth2UserInfoService implements OAuth2UserInfoService {
 
     private final NaverUserRepository naverUserRepository;
     private final UserRepository userRepository;
-    private final ItemService itemService;
+    private final ItemShareRepository itemService;
 
     @Override
-    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        OAuth2User user = super.loadUser(userRequest);
+    public OAuth2User processOAuth2User(String registrationId, OAuth2User oAuth2User) throws Exception {
+        try {
+            Map<String, Object> response = getResponse(oAuth2User);
 
-        isUserRegistered(user);
+            if (isUserRegistered(response)) {
+                // 로그인 처리 (jwt)
+            } else {
+                registerUser(response);
+                // 로그인 처리 (jwt)
 
-        return user;
+            }
+        } catch (Exception e) {
+            throw new Exception();
+        }
+
+        return oAuth2User;
     }
 
-    private void isUserRegistered(OAuth2User oAuth2User) {
+    private static Map<String, Object> getResponse(OAuth2User oAuth2User) throws Exception {
         Map<String, Object> attributes = oAuth2User.getAttributes();
 
         // 'response' 내부의 Map을 추출
-        Map<String, Object> response = (Map<String, Object>) attributes.get("response");
+        Object response = attributes.get("response");
+        if (response == null) {
+            throw new Exception("User attributes did not contain 'response' key.");
+        }
 
-        if (response != null) {
+        return (Map<String, Object>) response;
+    }
+
+    private boolean isUserRegistered(Map<String, Object> response) throws Exception {
+        try {
             String naverUserId = (String) response.get("id");
 
             Optional<NaverUser> naverUser = naverUserRepository.findById(naverUserId);
 
-            naverUser.ifPresentOrElse(
-                    foundUser -> {
-                        // 해당 유저의 페이지로 이동하는 로직
-                        // 예: 리디렉션 로직 구현
-                    },
-                    () -> {
-                        // 회원가입 로직
-                        registerUser(response); // Map<String, Object> 타입의 response를 전달
-                    }
-            );
-        } else {
-            // 'response'가 null인 경우의 처리
-            // 예: 로깅, 에러 페이지로 리디렉션 등
+            if (naverUser.isPresent()) {
+                // 해당 유저가 존재할 경우, true 반환
+                return true;
+            } else {
+                // 유저가 존재하지 않을 경우, 회원가입 로직 실행 후 false 반환
+                registerUser(response); // Map<String, Object> 타입의 response를 전달
+                return false;
+            }
+        } catch (Exception e) {
+            log.error("Failed to check User is registered {}: {}", response, e.getMessage(), e);
+            throw e;
         }
     }
 
@@ -90,7 +103,4 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         itemService.setDefaultData(user);
     }
 
-
-
 }
-
