@@ -1,5 +1,6 @@
 package com.stayserver.stayserver.advice;
 
+import com.stayserver.stayserver.exception.CustomOAuth2AuthenticationException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -167,5 +168,19 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
     }
+
+    @ExceptionHandler(CustomOAuth2AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleCustomOAuth2AuthenticationException(CustomOAuth2AuthenticationException ex, WebRequest request) {
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.UNAUTHORIZED.value(), // 혹은 적절한 다른 HTTP 상태 코드
+                "Authorization Error",
+                ex.getMessage(),
+                request.getDescription(false));
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED); // 혹은 적절한 다른 HTTP 상태 코드
+    }
+
 
 }

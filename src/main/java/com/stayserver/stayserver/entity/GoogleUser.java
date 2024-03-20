@@ -7,16 +7,15 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-
 @Entity
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class NaverUser {
+public class GoogleUser {
+
     @Id
     private String id;
     private String email;
     private String name;
-    private String birthYear;
 }

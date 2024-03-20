@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class KakaoOAuth2UserInfoService implements OAuth2UserInfoService{
     @Override
-    public OAuth2User processOAuth2User(String registrationId, OAuth2User oAuth2User) {
+    public OAuth2User processOAuth2User(String oauthProvider, OAuth2User oAuth2User) {
         return oAuth2User;
     }
 }

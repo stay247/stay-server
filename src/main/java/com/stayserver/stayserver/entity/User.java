@@ -17,7 +17,8 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer userId;
-    private String naverUserId;
+    private String oauthProvider;
+    private String oauthId;
     private String status;
     private LocalDateTime createdAt;
 
