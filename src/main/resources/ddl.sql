@@ -8,14 +8,22 @@ CREATE TABLE `naver_user`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_general_ci;
 
+CREATE TABLE `google_user`
+(
+    `id`    VARCHAR(255) PRIMARY KEY COMMENT '구글 사용자 고유 ID',
+    `email` VARCHAR(100) COMMENT '이메일 주소',
+    `name`  VARCHAR(100) COMMENT '사용자 이름'
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_general_ci;
+
 CREATE TABLE `user`
 (
-    `user_id`       INT AUTO_INCREMENT PRIMARY KEY COMMENT '사용자 식별자',
-    `naver_user_id` VARCHAR(255) NOT NULL COMMENT '네이버 사용자 ID',
-    `status`        VARCHAR(50)  NOT NULL COMMENT '계정 상태',
-    `created_at`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '가입 시간',
-    FOREIGN KEY (`naver_user_id`) REFERENCES `naver_user` (`id`),
-    UNIQUE (`naver_user_id`)
+    `user_id`        INT AUTO_INCREMENT PRIMARY KEY COMMENT '사용자 식별자',
+    `oauth_provider` VARCHAR(50)  NOT NULL COMMENT 'oauth 제공자',
+    `oauth_id`       VARCHAR(255) NOT NULL COMMENT 'oauth 고유 ID',
+    `status`         VARCHAR(50)  NOT NULL COMMENT '계정 상태',
+    `created_at`     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '가입 시간'
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_general_ci;
