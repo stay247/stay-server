@@ -42,7 +42,8 @@ public class GoogleOAuth2UserInfoService implements OAuth2UserInfoService{
         return oAuth2User;
     }
 
-    private boolean isUserRegistered(OAuth2User oAuth2User) {
+    @Override
+    public boolean isUserRegistered(OAuth2User oAuth2User) {
         try {
             Map<String, Object> attributes = oAuth2User.getAttributes();
             String id = (String) attributes.get("sub"); // 사용자 고유 ID
@@ -62,7 +63,8 @@ public class GoogleOAuth2UserInfoService implements OAuth2UserInfoService{
         }
     }
 
-    private void registerUser(OAuth2User oAuth2User, String registrationId) {
+    @Override
+    public void registerUser(OAuth2User oAuth2User, String registrationId) {
         try {
             Map<String, Object> attributes = oAuth2User.getAttributes();
 
@@ -83,6 +85,7 @@ public class GoogleOAuth2UserInfoService implements OAuth2UserInfoService{
                     .oauthProvider("google")
                     .oauthId(id)
                     .status("normal")
+                    .role("user")
                     .createdAt(LocalDateTime.now())
                     .build();
 

@@ -30,12 +30,11 @@ public class NaverOAuth2UserInfoService implements OAuth2UserInfoService {
     @Override
     public OAuth2User processOAuth2User(String oauthProvider, OAuth2User oAuth2User) {
         try {
-            Map<String, Object> response = getResponse(oAuth2User);
 
-            if (isUserRegistered(response)) {
+            if (isUserRegistered(oAuth2User)) {
                 // 로그인 처리 (jwt)
             } else {
-                registerUser(response);
+                registerUser(oAuth2User, oauthProvider);
                 // 로그인 처리 (jwt)
 
             }
@@ -46,27 +45,11 @@ public class NaverOAuth2UserInfoService implements OAuth2UserInfoService {
         return oAuth2User;
     }
 
-    private static Map<String, Object> getResponse(OAuth2User oAuth2User) throws Exception {
+    @Override
+    public boolean isUserRegistered(OAuth2User oAuth2User) throws Exception {
         try {
-            Map<String, Object> attributes = oAuth2User.getAttributes();
+            Map<String, Object> response = getResponse(oAuth2User);
 
-            // 'response' 내부의 Map을 추출
-            Object response = attributes.get("response");
-            if (response == null) {
-                log.error("User attributes did not contain 'response' key.");
-                throw new Exception("User attributes did not contain 'response' key.");
-            }
-            return (Map<String, Object>) response;
-
-        } catch (Exception e) {
-            log.error("An error occurred getting response from OAuth2User: {}", e.getMessage(), e);
-            throw e;
-        }
-
-    }
-
-    private boolean isUserRegistered(Map<String, Object> response) {
-        try {
             String naverUserId = (String) response.get("id");
 
             Optional<NaverUser> naverUser = naverUserRepository.findById(naverUserId);
@@ -79,13 +62,16 @@ public class NaverOAuth2UserInfoService implements OAuth2UserInfoService {
                 return false;
             }
         } catch (Exception e) {
-            log.error("Failed to check User is registered {}: {}", response, e.getMessage(), e);
+            log.error("Failed to check User is registered {}: {}", oAuth2User, e.getMessage(), e);
             throw e;
         }
     }
 
-    private void registerUser(Map<String, Object> response) {
+    @Override
+    public void registerUser(OAuth2User oAuth2User, String registrationId) throws Exception {
         try {
+            Map<String, Object> response = getResponse(oAuth2User);
+
             // response Map에서 필요한 정보 추출
             String id = (String) response.get("id");
             String email = (String) response.get("email");
@@ -106,6 +92,7 @@ public class NaverOAuth2UserInfoService implements OAuth2UserInfoService {
                     .oauthProvider("naver") // 이전 코드에서 naverUserId 변수가 정의되지 않았으므로, id를 사용
                     .oauthId(id)
                     .status("normal")
+                    .role("user")
                     .createdAt(LocalDateTime.now())
                     .build();
 
@@ -114,9 +101,28 @@ public class NaverOAuth2UserInfoService implements OAuth2UserInfoService {
             // 기본 아이템 세팅
             itemService.setDefaultData(user);
         } catch (Exception e) {
-            log.error("Error registering user with response data {}: {}", response, e.getMessage(), e);
+            log.error("Error registering user with oAuth2User data {}: {}", oAuth2User, e.getMessage(), e);
             throw e;
         }
+    }
+
+    private static Map<String, Object> getResponse(OAuth2User oAuth2User) throws Exception {
+        try {
+            Map<String, Object> attributes = oAuth2User.getAttributes();
+
+            // 'response' 내부의 Map을 추출
+            Object response = attributes.get("response");
+            if (response == null) {
+                log.error("User attributes did not contain 'response' key.");
+                throw new Exception("User attributes did not contain 'response' key.");
+            }
+            return (Map<String, Object>) response;
+
+        } catch (Exception e) {
+            log.error("An error occurred getting response from OAuth2User: {}", e.getMessage(), e);
+            throw e;
+        }
+
     }
 
 }

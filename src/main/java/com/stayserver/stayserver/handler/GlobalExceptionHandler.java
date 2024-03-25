@@ -1,4 +1,4 @@
-package com.stayserver.stayserver.advice;
+package com.stayserver.stayserver.handler;
 
 import com.stayserver.stayserver.exception.CustomOAuth2AuthenticationException;
 import jakarta.persistence.EntityNotFoundException;
@@ -18,8 +18,6 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 @RestControllerAdvice
 @Slf4j

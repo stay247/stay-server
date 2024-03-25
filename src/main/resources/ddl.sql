@@ -17,12 +17,21 @@ CREATE TABLE `google_user`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_general_ci;
 
+CREATE TABLE `kakao_user`
+(
+    `id`    VARCHAR(255) PRIMARY KEY COMMENT '카카오 사용자 고유 ID',
+    `name`  VARCHAR(100) COMMENT '사용자 이름'
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_general_ci;
+
 CREATE TABLE `user`
 (
     `user_id`        INT AUTO_INCREMENT PRIMARY KEY COMMENT '사용자 식별자',
     `oauth_provider` VARCHAR(50)  NOT NULL COMMENT 'oauth 제공자',
     `oauth_id`       VARCHAR(255) NOT NULL COMMENT 'oauth 고유 ID',
     `status`         VARCHAR(50)  NOT NULL COMMENT '계정 상태',
+    `role`           VARCHAR(50)  NOT NULL COMMENT '계정 역할',
     `created_at`     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '가입 시간'
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
@@ -98,4 +107,8 @@ CREATE TABLE `collection_share`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_general_ci;
 
+INSERT INTO `item` (`item_id`, `user_id`, `name`, `description`, `icon_data`, `sound_data`, `sharable`, `tag`, `created_at`, `updated_at`)
+VALUES
+    (1, NULL, 'rain', 'rain', 'rain', 'rain.mp3', 1, 'rain', '2024-03-17 20:49:17', '2024-03-17 20:49:17'),
+    (2, NULL, 'fire', 'fire', 'fire', 'fire.mp3', 1, 'fire', '2024-03-17 20:49:37', '2024-03-17 20:49:37');
 

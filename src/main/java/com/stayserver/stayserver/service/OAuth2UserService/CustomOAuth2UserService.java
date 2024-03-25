@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class CustomOAuth2UserService extends DefaultOAuth2UserService {
+public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
     private final GoogleOAuth2UserInfoService googleOAuth2UserInfoService;
     private final NaverOAuth2UserInfoService naverOAuth2UserInfoService;
@@ -20,7 +21,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         try {
-            OAuth2User oAuth2User = super.loadUser(userRequest);
+            // 기본 OAuth2UserService 객체 생성
+            OAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService = new DefaultOAuth2UserService();
+
+            // OAuth2UserService를 사용하여 OAuth2User 정보를 가져온다.
+            OAuth2User oAuth2User = oAuth2UserService.loadUser(userRequest);
+
             String registrationId = userRequest.getClientRegistration().getRegistrationId();
 
             switch (registrationId) {

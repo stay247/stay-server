@@ -20,6 +20,7 @@ public class User {
     private String oauthProvider;
     private String oauthId;
     private String status;
+    private String role;
     private LocalDateTime createdAt;
 
 }
