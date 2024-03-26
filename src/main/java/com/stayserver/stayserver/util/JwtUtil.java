@@ -23,7 +23,7 @@ public class JwtUtil {
     @Value("${jwt.secret}")
     private String secretKey;
 
-    public GeneratedToken generateToken(String userIdx, String role) {
+    public GeneratedToken generateToken(int userIdx, String role) {
         // refreshToken과 accessToken을 생성한다.
         String refreshToken = generateRefreshToken(userIdx, role);
         String accessToken = generateAccessToken(userIdx, role);
@@ -33,12 +33,13 @@ public class JwtUtil {
         return new GeneratedToken(accessToken, refreshToken);
     }
 
-    public String generateRefreshToken(String userIdx, String role) {
+    public String generateRefreshToken(int userIdx, String role) {
         // 토큰의 유효 기간을 밀리초 단위로 설정.
         long refreshPeriod = 1000L * 60L * 60L * 24L * 14; // 2주
 
         // 새로운 클레임 객체를 생성하고, 이메일과 역할(권한)을 셋팅
         Claims claims = Jwts.claims();
+        claims.put("userIdx", userIdx);
         claims.put("role", role);
 
         // 현재 시간과 날짜를 가져온다.
@@ -57,9 +58,10 @@ public class JwtUtil {
     }
 
 
-    public String generateAccessToken(String userIdx, String role) {
+    public String generateAccessToken(int userIdx, String role) {
         long tokenPeriod = 1000L * 60L * 30L; // 30분
         Claims claims = Jwts.claims();
+        claims.put("userIdx", userIdx);
         claims.put("role", role);
 
         Date now = new Date();
@@ -92,7 +94,10 @@ public class JwtUtil {
         }
     }
 
-
+    // 토큰에서 USERIDX(유저 식별자)만 추출한다.
+    public String getIdx(String token) {
+        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().get("userIdx", String.class);
+    }
 
     // 토큰에서 ROLE(권한)만 추출한다.
     public String getRole(String token) {
