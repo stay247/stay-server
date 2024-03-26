@@ -95,8 +95,8 @@ public class JwtUtil {
     }
 
     // 토큰에서 USERIDX(유저 식별자)만 추출한다.
-    public String getIdx(String token) {
-        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().get("userIdx", String.class);
+    public int getIdx(String token) {
+        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().get("userIdx", Integer.class);
     }
 
     // 토큰에서 ROLE(권한)만 추출한다.

@@ -5,6 +5,7 @@ import com.stayserver.stayserver.repository.jpa.GoogleUserRepository;
 import com.stayserver.stayserver.repository.jpa.KakaoUserRepository;
 import com.stayserver.stayserver.repository.jpa.NaverUserRepository;
 import com.stayserver.stayserver.repository.jpa.UserRepository;
+import com.stayserver.stayserver.service.jwt.GeneratedToken;
 import com.stayserver.stayserver.util.JwtUtil;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.ServletException;
@@ -48,10 +49,14 @@ public class CustomOauthSuccessHandler extends SimpleUrlAuthenticationSuccessHan
             // 프로바이더별 사용자 정보 처리
             User user = processUserInformation(registrationId, oAuth2User);
 
-            jwtUtil.generateToken(user.getUserId(), user.getRole());
+            GeneratedToken generatedToken = jwtUtil.generateToken(user.getUserId(), user.getRole());
+            log.info("accessToken = {}", generatedToken.getAccessToken());
 
+            httpServletResponse.setHeader("Authorization", "Bearer " + generatedToken.getAccessToken());
 
-            // TODO: user 사용하여 추가 작업 수행 (예: 토큰 생성)
+            // 사용자를 리디렉션할 URL 설정
+            httpServletResponse.sendRedirect("/success");
+
         }
     }
 

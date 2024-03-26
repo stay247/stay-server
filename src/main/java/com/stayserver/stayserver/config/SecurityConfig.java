@@ -2,6 +2,9 @@ package com.stayserver.stayserver.config;
 
 import com.stayserver.stayserver.handler.CustomOauthFailureHandler;
 import com.stayserver.stayserver.handler.CustomOauthSuccessHandler;
+import com.stayserver.stayserver.handler.JwtExceptionFilter;
+import com.stayserver.stayserver.service.OAuth2UserService.CustomOAuth2UserService;
+import com.stayserver.stayserver.service.jwt.JwtAuthFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -12,7 +15,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @RequiredArgsConstructor
 @Configuration
@@ -21,15 +24,19 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @Slf4j
 public class SecurityConfig {
 
+    private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomOauthSuccessHandler customOauthSuccessHandler;
     private final CustomOauthFailureHandler customOauthFailureHandler;
+    private final JwtAuthFilter jwtAuthFilter;
+    private final JwtExceptionFilter jwtExceptionFilter;
+
 
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
 
         httpSecurity
-                .csrf(AbstractHttpConfigurer::disable) // csrf 비활성화 -> cookie를 사용하지 않으면 꺼도 된다. (cookie를 사용할 경우 httpOnly(XSS 방어), sameSite(CSRF 방어)로 방어해야 한다.)
+                .csrf(AbstractHttpConfigurer::disable) // csrf 비활성화 -> cookie 를 사용하지 않으면 꺼도 된다. (cookie 를 사용할 경우 httpOnly(XSS 방어), sameSite(CSRF 방어)로 방어해야 한다.)
 //                .cors(AbstractHttpConfigurer::disable) // cors 비활성화 -> 프론트와 연결 시 따로 설정 필요
 //                .httpBasic(AbstractHttpConfigurer::disable) // 기본 인증 로그인 비활성화
 //                .formLogin(AbstractHttpConfigurer::disable) // 기본 login form 비활성화
@@ -39,22 +46,25 @@ public class SecurityConfig {
 
                 // request 인증, 인가 설정
                 .authorizeHttpRequests(request ->
-                        request.requestMatchers(
-                                        new AntPathRequestMatcher("/"),
-                                        new AntPathRequestMatcher("/login"),
-                                        new AntPathRequestMatcher("/success"),
-                                        new AntPathRequestMatcher("/failure")
-                                ).permitAll()
-                                .anyRequest().authenticated()
+                        request
+                            .requestMatchers("/login", "/success", "/failure").permitAll()
+                            .anyRequest().authenticated()
                 )
 
-                .oauth2Login(oauth2 -> oauth2
-                        .successHandler(customOauthSuccessHandler)
+                .oauth2Login(oauth2 ->
+                        oauth2
+                        .userInfoEndpoint(userInfoEndpointConfig ->
+                                userInfoEndpointConfig.userService(customOAuth2UserService))
                         .failureHandler(customOauthFailureHandler)
+                        .successHandler(customOauthSuccessHandler)
                 );
 
 
-        return httpSecurity.build();
+        // JWT 인증 필터를 UsernamePasswordAuthenticationFilter 앞에 추가한다.
+        return httpSecurity
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtExceptionFilter, JwtAuthFilter.class)
+                .build();
     }
 
 }
