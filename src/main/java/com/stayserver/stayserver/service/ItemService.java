@@ -2,6 +2,7 @@ package com.stayserver.stayserver.service;
 
 import com.stayserver.stayserver.dto.CollectionDTO;
 import com.stayserver.stayserver.entity.*;
+import com.stayserver.stayserver.repository.*;
 import com.stayserver.stayserver.repository.jpa.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

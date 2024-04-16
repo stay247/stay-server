@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 
 @SpringBootApplication
-@EnableRedisRepositories(basePackages = "com.stayserver.stayserver.repository.redis")
+@EnableRedisRepositories(basePackages = "com.stayserver.stayserver.redis")
 public class StayServerApplication {
 
 	public static void main(String[] args) {
